@@ -1,0 +1,139 @@
+# Optimized Laravel .htaccess file to prevent redirect loops
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect HTTP to HTTPS - ONLY if not already on HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+    
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+    
+    # Handle robots.txt and sitemap.xml directly
+    RewriteCond %{REQUEST_URI} ^/robots\.txt$ [NC,OR]
+    RewriteCond %{REQUEST_URI} ^/.*sitemap.*\.xml$ [NC]
+    RewriteRule ^ - [L]
+    
+    # Redirect /index.php to / - prevent PHP from running for direct access
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php
+    RewriteRule ^index\.php$ / [R=301,L]
+    
+    # Redirect /index.html to /
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html
+    RewriteRule ^index\.html$ / [R=301,L]
+    
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Add browser caching rules
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Default expiry: 1 hour
+    ExpiresDefault "access plus 1 hour"
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    # Fonts
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    # Data interchange
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 1 day"
+    ExpiresByType text/xml "access plus 1 day"
+</IfModule>
+
+# Add Cache-Control headers
+<IfModule mod_headers.c>
+    # 1 YEAR - Images, icons, fonts
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|webp|avif|ttf|otf|woff|woff2)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # 1 MONTH - CSS, JavaScript
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+    
+    # 1 DAY - XML files including sitemaps
+    <FilesMatch "\.(xml)$">
+        Header set Cache-Control "max-age=86400, public"
+    </FilesMatch>
+    
+    # NEVER CACHE - Dynamic content
+    <FilesMatch "\.(php|html|htm)$">
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </FilesMatch>
+    
+    # Disable ETags
+    Header unset ETag
+    FileETag None
+</IfModule>
+
+# Compress text files
+<IfModule mod_deflate.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE application/javascript
+        AddOutputFilterByType DEFLATE application/json
+        AddOutputFilterByType DEFLATE application/x-javascript
+        AddOutputFilterByType DEFLATE application/xml
+        AddOutputFilterByType DEFLATE font/ttf
+        AddOutputFilterByType DEFLATE font/otf
+        AddOutputFilterByType DEFLATE font/woff
+        AddOutputFilterByType DEFLATE image/svg+xml
+        AddOutputFilterByType DEFLATE text/css
+        AddOutputFilterByType DEFLATE text/html
+        AddOutputFilterByType DEFLATE text/javascript
+        AddOutputFilterByType DEFLATE text/plain
+        AddOutputFilterByType DEFLATE text/xml
+    </IfModule>
+</IfModule>
+
+# Add security headers
+<IfModule mod_headers.c>
+    # Protect against XSS attacks
+    Header set X-XSS-Protection "1; mode=block"
+    # Prevent MIME-type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    # Prevent clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    # Enforce HTTPS
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+    # Referrer policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Permissions policy
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# Test rule
+<IfModule mod_headers.c>
+    Header set X-Htaccess-Test "Working"
+</IfModule>

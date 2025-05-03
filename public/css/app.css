@@ -1,0 +1,105 @@
+/* Custom CSS for Netflix-like styling */
+body {
+    background-color: #141414;
+    color: #ffffff;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.netflix-overlay {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, 
+                rgba(20, 20, 20, 0.9) 100%), 
+                url('/images/backdrop.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.movie-card {
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.movie-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+}
+
+.movie-card:hover img {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Enhanced trailer modal and play button effects */
+.heroPlayButton {
+    transition: all 0.3s ease;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.heroPlayButton:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 40px rgba(229, 9, 20, 0.4);
+}
+
+#trailerModal {
+    transition: opacity 0.3s ease;
+}
+
+#trailerModal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#trailerModal.flex {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.trailerModalContent {
+    width: 90%;
+    max-width: 1200px;
+    position: relative;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from { 
+        transform: scale(0.9);
+        opacity: 0; 
+    }
+    to { 
+        transform: scale(1);
+        opacity: 1; 
+    }
+}
+
+/* Additional CSS for app.css */
+
+/* Ensure posters are visible */
+.movie-card .poster {
+    position: relative;
+    height: 0;
+    padding-top: 150%; /* 2:3 aspect ratio */
+    overflow: hidden;
+}
+
+.movie-card .poster img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover .poster img {
+    transform: scale(1.05);
+}
+
+/* Debugging outline to see container boundaries */
+.movie-card .poster {
+    border: 1px solid transparent;
+}
