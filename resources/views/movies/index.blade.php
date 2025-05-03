@@ -135,7 +135,7 @@
                             @endphp
                             
                             @if(!empty($posterUrl))
-                                <img src="{{ $posterUrl }}" class="card-img-top" alt="{{ $movie['title'] }} poster - Watch on 123 Movies Pro" loading="lazy">
+                                <img data-src="{{ $posterUrl }}" class="card-img-top" alt="{{ $movie['title'] }} poster - Watch on 123 Movies Pro" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 750' %3E%3Crect width='500' height='750' fill='%23333333'/%3E%3C/svg%3E">
                             @else
                                 <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center">
                                     <span class="text-light"><i class="bi bi-film" style="font-size: 3rem;"></i></span>

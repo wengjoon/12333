@@ -607,8 +607,8 @@ class TmdbService
         // Use a specific cache key for top rated movies
         $cacheKey = 'omdb_top_rated_movies_list';
         
-        // Get the preselected movie IDs from cache to avoid reshuffling on each call
-        $topRatedMovies = Cache::remember($cacheKey, 86400, function() {
+        // Increase cache time to 1 week (604800 seconds) for this rarely changing data
+        $topRatedMovies = Cache::remember($cacheKey, 604800, function() {
             // For top rated, we'll use a curated list of known top IMDb movies
             $movies = [
                 'tt0111161', // The Shawshank Redemption
@@ -636,26 +636,25 @@ class TmdbService
         });
         
         $results = [];
-        $startIndex = ($page - 1) * 8;
-        $endIndex = min($startIndex + 8, count($topRatedMovies));
+        // Limit movies to 4 per page for faster loading
+        $moviesPerPage = 4;
+        $startIndex = ($page - 1) * $moviesPerPage;
+        $endIndex = min($startIndex + $moviesPerPage, count($topRatedMovies));
         
         // Get the movie IDs for this page
         $pageMovieIds = array_slice($topRatedMovies, $startIndex, $endIndex - $startIndex);
         
         // Log which movies we're fetching
-        Log::info('OMDB getTopRatedMovies - Fetching movies for page ' . $page, [
-            'count' => count($pageMovieIds),
-            'ids' => $pageMovieIds
+        Log::info('OMDB getTopRatedMovies - Fetching movies', [
+            'page' => $page,
+            'movies_to_fetch' => $pageMovieIds
         ]);
-        
-        // Process at most 4 movies to avoid timeout
-        $pageMovieIds = array_slice($pageMovieIds, 0, 4);
         
         foreach ($pageMovieIds as $imdbId) {
             // Check if we already have this movie details in cache
             $movieCacheKey = 'omdb_movie_details_' . $imdbId;
             
-            $details = Cache::remember($movieCacheKey, 86400, function() use ($imdbId) {
+            $details = Cache::remember($movieCacheKey, 604800, function() use ($imdbId) {
                 try {
                     Log::info('OMDB getTopRatedMovies - Fetching details for ' . $imdbId);
                     return $this->getMovieDetails($imdbId);
@@ -667,7 +666,9 @@ class TmdbService
             
             if ($details && isset($details['title']) && $details['title'] !== 'Movie not found') {
                 $results[] = $details;
-                Log::info('OMDB getTopRatedMovies - Added: ' . $details['title']);
+                Log::info('OMDB getTopRatedMovies - Successfully added: ' . $details['title'] . ' with poster: ' . ($details['poster_path'] ?? 'None'));
+            } else {
+                Log::warning('OMDB getTopRatedMovies - Failed to get details for ' . $imdbId);
             }
         }
         
@@ -676,7 +677,7 @@ class TmdbService
         return [
             'results' => $results,
             'page' => $page,
-            'total_pages' => ceil(count($topRatedMovies) / 8),
+            'total_pages' => ceil(count($topRatedMovies) / $moviesPerPage),
             'total_results' => count($topRatedMovies)
         ];
     }

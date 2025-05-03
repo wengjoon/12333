@@ -33,6 +33,9 @@ class MovieController extends Controller
         // Cache key for top rated movies
         $cacheKey = 'top_rated_movies';
         
+        // Increase cache time for production
+        $cacheTime = env('APP_ENV') === 'production' ? 10080 : 1440; // 1 week in production
+        
         // Only refresh cache if it doesn't exist or if specifically requested
         $refresh = request()->has('refresh');
         
@@ -41,10 +44,10 @@ class MovieController extends Controller
             Log::info('MovieController: Manually refreshing top rated movies cache');
         }
         
-        // Cache top rated movies for a day
-        $topRatedMovies = Cache::remember($cacheKey, 1440, function () {
+        // Cache top rated movies 
+        $topRatedMovies = Cache::remember($cacheKey, $cacheTime, function () {
             try {
-                Log::info('MovieController: Fetching top rated movies from OMDB');
+                Log::info('MovieController: Refreshing top rated movies cache to pull from OMDB');
                 $response = $this->movieService->getTopRatedMovies();
                 
                 if (!empty($response['results'])) {
@@ -67,8 +70,8 @@ class MovieController extends Controller
             }
         });
 
-        // Split movies into rows (4 movies per row)
-        $movieRows = array_chunk($topRatedMovies, 4);
+        // Split movies into rows (2 movies per row for initial load)
+        $movieRows = array_chunk($topRatedMovies, 2);
         
         return view('movies.index', [
             'movieRows' => $movieRows
