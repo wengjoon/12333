@@ -5,7 +5,7 @@
 @section('seo_description', config('seo.default_description'))
 @section('seo_keywords', config('seo.default_keywords'))
 @section('og_type', 'website')
-@section('canonical_url', 'https://123moviespro.cc/')
+@section('canonical_url', 'https://123moviespro.com/')
 
 {{-- Structured Data for Homepage --}}
 @section('structured_data')

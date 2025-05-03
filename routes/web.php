@@ -33,8 +33,8 @@ if (method_exists(MovieApiController::class, 'search')) {
 
 Route::get('robots.txt', function () {
     $robotsContent = "# Sitemap for all bots
-Sitemap: https://123moviespro.cc/sitemap.xml
-Sitemap: https://123moviespro.cc/123moviespro_sitemap.xml
+Sitemap: https://123moviespro.com/sitemap.xml
+Sitemap: https://123moviespro.com/123moviespro_sitemap.xml
 # Rules for all bots
 User-agent: *
 Disallow: /admin/           # Block admin areas

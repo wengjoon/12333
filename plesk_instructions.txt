@@ -1,0 +1,89 @@
+# Instructions for Resolving 404 Errors on Plesk Server for 123moviespro.com
+
+## Issue Description
+Users are currently experiencing 404 (Not Found) errors when trying to access movie detail pages with IMDb IDs, such as:
+https://123moviespro.com/movie/tt1611224
+
+This URL is correctly formed and works on the development server, but returns a 404 error on the production server.
+
+## Troubleshooting Steps for Plesk Admin
+
+1. **Verify Apache Configuration**
+   - Check if mod_rewrite is enabled in Apache
+   - Ensure the .htaccess file in the public directory is being read properly
+   - Verify that AllowOverride is set to All for the site's DocumentRoot
+
+2. **Check Plesk Domain Settings**
+   - Verify that the domain is correctly configured in Plesk
+   - Ensure the Document Root is pointing to the /public directory of the Laravel application
+   - Check that the domain's IP address matches the DNS settings
+
+3. **Apache Virtual Host Configuration**
+   - Add the following directives to the VirtualHost configuration for 123moviespro.com:
+   ```
+   <Directory /var/www/vhosts/123moviespro.com/httpdocs/public>
+       Options Indexes FollowSymLinks MultiViews
+       AllowOverride All
+       Require all granted
+   </Directory>
+   ```
+
+4. **PHP Configuration**
+   - Ensure PHP version matches the application requirements (PHP 8.1+)
+   - Check PHP error logs for any related errors
+
+5. **Cache and Permission Fixes**
+   - Run the following commands in the Laravel root directory:
+   ```
+   php artisan cache:clear
+   php artisan config:clear
+   php artisan view:clear
+   php artisan route:clear
+   php artisan optimize
+   
+   # Set proper permissions
+   find bootstrap/cache -type d -exec chmod 755 {} \;
+   find bootstrap/cache -type f -exec chmod 644 {} \;
+   find storage -type d -exec chmod 755 {} \;
+   find storage -type f -exec chmod 644 {} \;
+   chmod -R ug+rwx storage bootstrap/cache
+   ```
+
+6. **Test IMDb ID Routing**
+   - Create a test file in the public directory named test.php with the following content:
+   ```php
+   <?php
+   echo "URL: " . $_SERVER['REQUEST_URI'] . "<br>";
+   echo "Route exists: " . (file_exists(__DIR__ . '/../routes/web.php') ? 'Yes' : 'No') . "<br>";
+   echo "Laravel version: " . (file_exists(__DIR__ . '/../vendor/laravel/framework/src/Illuminate/Foundation/Application.php') ? 'Installed' : 'Not installed');
+   ```
+   - Access this file at https://123moviespro.com/test.php to verify basic PHP execution
+   - Then try accessing https://123moviespro.com/movie/tt1234567 and check error logs
+
+7. **Restart Web Services**
+   - After making any configuration changes, restart Apache:
+   ```
+   service apache2 restart
+   ```
+   or
+   ```
+   systemctl restart apache2
+   ```
+
+## Additional Considerations
+
+1. **CDN Configuration**
+   - If using a CDN like Cloudflare, ensure it's not caching the 404 response
+   - Temporarily bypass the CDN to test direct server access
+
+2. **Firewall Rules**
+   - Check if there are any WAF or firewall rules blocking URLs with certain patterns
+
+3. **Log Access and Error Logs**
+   - Monitor Apache access and error logs during page access attempts:
+   ```
+   tail -f /var/www/vhosts/123moviespro.com/logs/error_log
+   tail -f /var/www/vhosts/123moviespro.com/logs/access_log
+   ```
+
+Please implement these steps and provide feedback on what resolved the issue for future reference. 

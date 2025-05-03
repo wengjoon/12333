@@ -33,6 +33,10 @@
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html
     RewriteRule ^index\.html$ / [R=301,L]
     
+    # Special handling for movie IDs that start with "tt" (IMDb IDs)
+    RewriteCond %{REQUEST_URI} ^/movie/tt([0-9]+)$ [NC]
+    RewriteRule ^ /index.php [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
