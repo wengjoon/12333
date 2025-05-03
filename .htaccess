@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the request is for an existing file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Otherwise, send the request to index.php
+    RewriteRule ^ index.php [L]
+  
+  # Test rule
+<IfModule mod_headers.c>
+    Header set X-Htaccess-Test "Working"
+</IfModule>
+</IfModule>
